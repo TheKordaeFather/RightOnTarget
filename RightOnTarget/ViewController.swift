@@ -13,52 +13,33 @@ class ViewController: UIViewController {
     
     @IBOutlet weak var currentNumberLabel: UILabel!
     
-    
-    
-    let roundCount:Int = 5
-    var currentRound:Int = 1
-    var score:Int = 250
-    
+    var game:GameProtocol!
+
     override func viewDidLoad() {
         super.viewDidLoad()
         currentNumberLabel.text = String(Int.random(in: 1...50))
-        
+        game = Game()
     }
     
-    func calculateScore(_ currentNumber:Int) -> Int {
-        let calculatedResult = abs(currentNumber - Int(slider.value.rounded()))
-        currentRound += 1
-        guard currentRound != 6 else {
-            currentNumberLabel.text = "End"
-            return calculatedResult
-        }
-        currentNumberLabel.text = String(Int.random(in: 1...50))
-        return calculatedResult
-    }
-    
-    @IBAction func sliderChanged(_ sender: UISlider) {
-        
+    func alertControllerPerfomance(){
+        let alertController = UIAlertController(title: "конец игры", message: "у вас \(game.score) очков", preferredStyle: .alert)
+        let alertAction = UIAlertAction(title: "Начать заново", style: .default) { [self] _ in
+            slider.value = 25
+            currentNumberLabel.text = String(Int.random(in: 1...50))
+        }        
+        alertController.addAction(alertAction)
+        self.present(alertController, animated: true, completion: nil)
     }
     
     @IBAction func checkResultButton(_ sender: UIButton) {
         let currentNumber:Int = Int(currentNumberLabel.text!) ?? 0
-        score -= calculateScore(currentNumber)
-        
-        print(currentRound - 1)
-        if currentRound == 6 {
-            var alertController = UIAlertController(title: "конец игры", message: "у вас \(score) очков", preferredStyle: .alert)
-            var alertAction = UIAlertAction(title: "Начать заново", style: .default) { _ in
-                self.currentRound = 1
-                self.score = 250
-                self.currentNumberLabel.text = String(Int.random(in: 1...50))
-                self.slider.value = 25
-                
-            }
-            alertController.addAction(alertAction)
-            self.present(alertController, animated: true, completion: nil)
-            
+        game.score -= game.calculateScore(currentNumber, sliderValue: slider.value.rounded(), currentNumberLabel)
+                        
+        if game.currentRound == 6 {
+            alertControllerPerfomance()
+            game.updateGameParameters(firstRound: 1, startingScore: 250)
         }
-        
+         
     }
 }
 
